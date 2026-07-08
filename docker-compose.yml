@@ -1,0 +1,99 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        container_name: reclaim-app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - .:/var/www
+        networks:
+            - reclaim
+        depends_on:
+            db:
+                condition: service_healthy
+
+    webserver:
+        image: nginx:alpine
+        container_name: reclaim-webserver
+        restart: unless-stopped
+        ports:
+            - '${APP_PORT:-80}:80'
+        volumes:
+            - .:/var/www
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+        networks:
+            - reclaim
+        depends_on:
+            - app
+
+    db:
+        image: mysql:8.0
+        container_name: reclaim-db
+        restart: unless-stopped
+        ports:
+            - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+        volumes:
+            - reclaim-mysql:/var/lib/mysql
+        networks:
+            - reclaim
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${DB_ROOT_PASSWORD}']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        platform: linux/amd64
+        container_name: reclaim-phpmyadmin
+        restart: unless-stopped
+        ports:
+            - '${FORWARD_PHPMYADMIN_PORT:-8081}:80'
+        environment:
+            PMA_HOST: db
+            PMA_PORT: 3306
+            MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+        networks:
+            - reclaim
+        depends_on:
+            db:
+                condition: service_healthy
+
+    node:
+        image: node:24-alpine
+        container_name: reclaim-node
+        restart: unless-stopped
+        working_dir: /var/www
+        ports:
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            VITE_PORT: '${VITE_PORT:-5173}'
+            CHOKIDAR_USEPOLLING: 'true'
+            WAYFINDER_COMMAND: 'true'
+        volumes:
+            - .:/var/www
+            - reclaim-node-modules:/var/www/node_modules
+        entrypoint: ['/bin/sh', '/var/www/docker/node/entrypoint.sh']
+        networks:
+            - reclaim
+
+networks:
+    reclaim:
+        driver: bridge
+
+volumes:
+    reclaim-mysql:
+        driver: local
+    reclaim-node-modules:
+        driver: local
