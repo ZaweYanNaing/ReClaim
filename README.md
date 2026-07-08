@@ -144,3 +144,25 @@ If you see warnings about `reclaim-laravel.test-1` or `reclaim-mysql-1`, run `do
 ### Laravel Sail
 
 The repository also contains `compose.sail.yaml` for [Laravel Sail](https://laravel.com/docs/sail). Use `docker compose` for the Nginx + PHP-FPM setup described above, or `./vendor/bin/sail` for the Sail workflow.
+
+
+
+# Build and start all containers
+docker compose up -d --build
+
+# Install PHP dependencies (first run only)
+docker compose exec app composer install
+
+# Generate app key (if APP_KEY is empty in .env)
+docker compose exec app php artisan key:generate
+
+# Run migrations
+docker compose exec app php artisan migrate
+
+
+
+
+# Daily Use 
+docker compose up -d       # start
+docker compose down        # stop
+docker compose logs -f     # view logs
