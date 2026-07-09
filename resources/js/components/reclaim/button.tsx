@@ -9,21 +9,22 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 primary:
-                    'bg-primary text-primary-foreground shadow-soft hover:-translate-y-0.5 hover:bg-primary/90',
+                    'btn-shimmer text-forest font-semibold shadow-lime hover:-translate-y-0.5 hover:shadow-lime',
                 secondary:
-                    'bg-secondary text-secondary-foreground hover:bg-amber-warm/40',
+                    'bg-secondary text-secondary-foreground hover:bg-secondary/80',
                 accent:
-                    'bg-accent text-accent-foreground shadow-soft hover:-translate-y-0.5 hover:bg-accent/90',
+                    'bg-forest text-white shadow-forest hover:-translate-y-0.5 hover:bg-forest-light',
                 outline:
-                    'border border-border bg-card text-foreground hover:border-primary/30 hover:bg-cream-dark',
-                ghost: 'text-foreground hover:bg-cream-dark',
+                    'border-2 border-forest/20 bg-white text-forest hover:border-forest/50 hover:bg-forest/5',
+                ghost: 'text-foreground hover:bg-muted',
                 destructive:
                     'bg-destructive text-white shadow-soft hover:-translate-y-0.5 hover:bg-destructive/90',
+                lime: 'bg-lime text-forest-dark font-semibold hover:-translate-y-0.5 hover:bg-lime/90 shadow-lime',
             },
             size: {
                 sm: 'h-9 px-4 text-sm',
                 md: 'h-11 px-5 text-sm',
-                lg: 'h-12 px-6 text-base',
+                lg: 'h-12 px-7 text-base',
             },
         },
         defaultVariants: {
